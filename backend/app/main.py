@@ -51,3 +51,9 @@ def root():
         "project": settings.PROJECT_NAME,
         "docs_url": "/docs"
     }
+
+# Health check endpoint
+@app.get("/health")
+def health():
+    """Simple health check returning plain text."""
+    return "ok"
