@@ -4,7 +4,7 @@ import os
 import logging
 from typing import Optional, Tuple, List, Dict
 
-# Setup logging
+# Setup logger
 logger = logging.getLogger("face_service")
 
 # Try to import face_recognition and cv2
@@ -13,40 +13,55 @@ try:
     import cv2
     HAS_FACE_RECOGNITION = True
     logger.info("face_recognition and OpenCV loaded successfully.")
-except ImportError as e:
+except Exception as e:
     HAS_FACE_RECOGNITION = False
-    logger.warning(f"Failed to import face_recognition or OpenCV: {e}. Running in Developer Mock Mode.")
+    logger.warning(f"face_recognition import failed ({e}), will use DeepFace fallback.")
+
+# Try to import DeepFace
+try:
+    from deepface import DeepFace
+    HAS_DEEPFACE = True
+    logger.info("DeepFace loaded successfully.")
+except Exception as e:
+    HAS_DEEPFACE = False
+    logger.error(f"DeepFace import failed ({e}). Face functionality will be mocked.")
 
 class FaceService:
     @staticmethod
-    def get_face_encoding_from_image(image_path: str) -> Optional[bytes]:
-        """
-        Loads an image from disk and extracts the 128-d face encoding vector.
-        Returns the vector serialized as bytes, or None if no face is detected.
-        """
-        if not HAS_FACE_RECOGNITION:
-            logger.info(f"Mock encoding face image for path: {image_path}")
-            # Generate a stable mock embedding based on filename hash to keep mocks deterministic
-            mock_hash = hash(os.path.basename(image_path)) % 1000
-            np.random.seed(mock_hash)
-            mock_encoding = np.random.uniform(-0.1, 0.1, 128).astype(np.float64)
-            return mock_encoding.tobytes()
+    def _mock_encoding(image_path: str) -> bytes:
+        """Generate a deterministic mock encoding based on filename hash."""
+        mock_hash = hash(os.path.basename(image_path)) % 1000
+        np.random.seed(mock_hash)
+        mock_encoding = np.random.uniform(-0.1, 0.1, 128).astype(np.float64)
+        return mock_encoding.tobytes()
 
-        try:
-            # Load the image
-            image = face_recognition.load_image_file(image_path)
-            # Find face encodings
-            encodings = face_recognition.face_encodings(image)
-            
-            if not encodings:
-                logger.warning(f"No faces found in image: {image_path}")
-                return None
-                
-            # Return the first face encoding serialized to bytes
-            return encodings[0].tobytes()
-        except Exception as e:
-            logger.error(f"Error extracting face encoding: {e}")
-            return None
+    @staticmethod
+    def get_face_encoding_from_image(image_path: str) -> Optional[bytes]:
+            if HAS_FACE_RECOGNITION:
+                try:
+                    image = face_recognition.load_image_file(image_path)
+                    encodings = face_recognition.face_encodings(image)
+                    if encodings:
+                        return encodings[0].tobytes()
+                    logger.warning(f\"No faces found with face_recognition in {image_path}\")
+                    return None
+                except Exception as e:
+                    logger.error(f\"face_recognition error: {e}\")
+                    return None
+            elif HAS_DEEPFACE:
+                try:
+                    objs = DeepFace.represent(img_path=image_path, model_name=\"Facenet\", enforce_detection=False)
+                    if objs:
+                        embedding = np.array(objs[0][\"embedding\"]).astype(np.float64)
+                        return embedding.tobytes()
+                    logger.warning(f\"DeepFace returned empty embedding for {image_path}\")
+                    return None
+                except Exception as e:
+                    logger.error(f\"DeepFace error: {e}\")
+                    return None
+            else:
+                logger.info(\"Using mock face encoding.\")
+                return FaceService._mock_encoding(image_path)
 
     @staticmethod
     def decode_base64_image(base64_str: str) -> Optional[np.ndarray]:
@@ -85,15 +100,52 @@ class FaceService:
             return None, 0.0
 
         if not HAS_FACE_RECOGNITION:
-            # In developer mock mode: randomly match one of the student IDs for demo purposes, or return first
-            # We will use mock mode matching logic: match the first student if students exist, or "unknown" if list empty.
-            # To simulate, if known_students has elements, return the first student with high confidence.
-            logger.info("Developer Mock Mode: Simulating face match.")
-            import random
-            if random.random() < 0.2:
-                return None, 0.0  # Simulate 20% unknown
-            student = random.choice(known_students)
-            return student["student_id"], 0.92
+    if HAS_DEEPFACE:
+        try:
+            # Use DeepFace to get embedding for the frame
+            # Convert frame to image file temporarily using cv2.imencode
+            success, encoded_image = cv2.imencode('.jpg', frame_bgr)
+            if not success:
+                logger.error("Failed to encode frame for DeepFace.")
+                return None, 0.0
+            # Write to temporary in-memory buffer
+            import io
+            img_bytes = io.BytesIO(encoded_image.tobytes())
+            # DeepFace expects a path or numpy array; we can pass the numpy array directly
+            objs = DeepFace.represent(img_path=img_bytes, model_name="Facenet", enforce_detection=False)
+            if not objs:
+                logger.warning("DeepFace could not find a face in the frame.")
+                return None, 0.0
+            unknown_embedding = np.array(objs[0]["embedding"]).astype(np.float64)
+        except Exception as e:
+            logger.error(f"DeepFace error during frame representation: {e}")
+            return None, 0.0
+    else:
+        logger.info("Using mock face encoding for frame.")
+        unknown_embedding = FaceService._mock_encoding('frame')
+    # Prepare known embeddings
+    known_embeddings = []
+    known_ids = []
+    for student in known_students:
+        if student["encoding_bytes"]:
+            known_embeddings.append(np.frombuffer(student["encoding_bytes"], dtype=np.float64))
+            known_ids.append(student["student_id"])
+    if not known_embeddings:
+        return None, 0.0
+    # Compute distances (cosine similarity) between unknown and known
+    distances = []
+    for known in known_embeddings:
+        # cosine distance = 1 - cosine similarity
+        cos_sim = np.dot(unknown_embedding, known) / (np.linalg.norm(unknown_embedding) * np.linalg.norm(known) + 1e-6)
+        distances.append(1 - cos_sim)
+    best_idx = int(np.argmin(distances))
+    best_distance = distances[best_idx]
+    # Threshold for cosine distance; empirical value 0.4 works reasonably
+    threshold = 0.4
+    if best_distance <= threshold:
+        confidence = float(max(0.0, 1.0 - (best_distance / threshold)))
+        return known_ids[best_idx], confidence
+    return None, 0.0
 
         try:
             # Convert OpenCV BGR to face_recognition RGB

@@ -2,7 +2,7 @@
 set -e
 
 # Install dlib precompiled binary to avoid source compilation
-pip install --no-cache-dir dlib-bin
+
 
 # Install other Python dependencies (including face_recognition which will use the preinstalled dlib)
 pip install --no-cache-dir -r requirements.txt
