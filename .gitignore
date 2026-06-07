@@ -19,3 +19,9 @@ Thumbs.db
 # Node
 node_modules/
 dist/
+
+# Additional ignore patterns
+*.log
+.env.*
+secrets.json
+attendance.db
