@@ -43,7 +43,7 @@ class FaceService:
                     encodings = face_recognition.face_encodings(image)
                     if encodings:
                         return encodings[0].tobytes()
-                    logger.warning(f\"No faces found with face_recognition in {image_path}\")
+                    logger.warning(f"No faces found with face_recognition in {image_path}")
                     return None
                 except Exception as e:
                     logger.error(f\"face_recognition error: {e}\")
