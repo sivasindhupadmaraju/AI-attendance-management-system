@@ -46,21 +46,21 @@ class FaceService:
                     logger.warning(f"No faces found with face_recognition in {image_path}")
                     return None
                 except Exception as e:
-                    logger.error(f\"face_recognition error: {e}\")
+                    logger.error(f"face_recognition error: {e}")
                     return None
             elif HAS_DEEPFACE:
                 try:
-                    objs = DeepFace.represent(img_path=image_path, model_name=\"Facenet\", enforce_detection=False)
+                    objs = DeepFace.represent(img_path=image_path, model_name="Facenet", enforce_detection=False)
                     if objs:
-                        embedding = np.array(objs[0][\"embedding\"]).astype(np.float64)
+                        embedding = np.array(objs[0]["embedding"]).astype(np.float64)
                         return embedding.tobytes()
-                    logger.warning(f\"DeepFace returned empty embedding for {image_path}\")
+                    logger.warning(f"DeepFace returned empty embedding for {image_path}")
                     return None
                 except Exception as e:
-                    logger.error(f\"DeepFace error: {e}\")
+                    logger.error(f"DeepFace error: {e}")
                     return None
             else:
-                logger.info(\"Using mock face encoding.\")
+                logger.info("Using mock face encoding.")
                 return FaceService._mock_encoding(image_path)
 
     @staticmethod
