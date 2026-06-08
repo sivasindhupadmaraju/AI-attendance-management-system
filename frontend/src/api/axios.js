@@ -1,7 +1,14 @@
 import axios from 'axios';
 
+// Use VITE_API_URL in production; fall back to Vite dev‑proxy during local development
+// If the variable is missing in a production build we log a warning – API calls will otherwise fail.
+const baseURL = import.meta.env.VITE_API_URL;
+if (import.meta.env.PROD && !baseURL) {
+  // eslint-disable-next-line no-console
+  console.error('⚠️ VITE_API_URL is not defined – API requests will fail');
+}
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL: baseURL ?? '/api',
   headers: {
     'Content-Type': 'application/json',
   },

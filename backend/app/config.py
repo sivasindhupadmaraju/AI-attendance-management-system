@@ -13,7 +13,7 @@ class Settings:
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./attendance.db")
     
     # Media Storage
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
     MEDIA_DIR: str = os.path.join(BASE_DIR, "student_images")
     
     # Attendance Configuration
