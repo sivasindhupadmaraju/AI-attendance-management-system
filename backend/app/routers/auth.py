@@ -89,10 +89,7 @@ def update_profile(
     """Update profile details for the current user."""
     if profile_data.full_name is not None:
         current_user.full_name = profile_data.full_name
-    if (
-        profile_data.email is not None
-        and profile_data.email != current_user.email
-    ):
+    if profile_data.email is not None and profile_data.email != current_user.email:
         existing = db.query(User).filter(User.email == profile_data.email).first()
         if existing:
             raise HTTPException(
