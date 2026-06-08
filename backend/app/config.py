@@ -29,7 +29,6 @@ class Settings:
         {"id": "4", "name": "Period 4 (12-1 PM)", "start": "12:00:00", "end": "12:59:59", "late_threshold_min": 10},
         {"id": "5", "name": "Period 5 (2-3 PM)", "start": "14:00:00", "end": "14:59:59", "late_threshold_min": 10},
         {"id": "6", "name": "Period 6 (3-4 PM)", "start": "15:00:00", "end": "15:59:59", "late_threshold_min": 10},
-        {"id": "7", "name": "Period 7 (4-5 PM)", "start": "16:00:00", "end": "16:59:59", "late_threshold_min": 10},
     ]
 
 
