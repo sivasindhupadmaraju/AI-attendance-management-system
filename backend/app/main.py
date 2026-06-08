@@ -18,10 +18,10 @@ app = FastAPI(
 
 # Set CORS origins
 origins = [
-    "http://localhost:5173",  # Vite default port
+    "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:3000",
-    "*"
+    "https://ai-attendance-management-system-b82w1vmia.vercel.app"
 ]
 
 app.add_middleware(
