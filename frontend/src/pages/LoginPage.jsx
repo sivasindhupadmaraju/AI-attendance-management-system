@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Camera, Lock, Mail, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -108,6 +108,13 @@ const LoginPage = () => {
             )}
           </button>
         </form>
+
+        <div className="text-center pt-4 border-t border-slate-850 text-xs text-slate-500 mt-5">
+          New teacher?{' '}
+          <Link to="/register" className="text-brand-400 hover:text-brand-350 font-bold hover:underline transition-colors">
+            Register here
+          </Link>
+        </div>
       </div>
     </div>
   );

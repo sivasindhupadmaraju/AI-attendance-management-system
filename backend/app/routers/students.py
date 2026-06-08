@@ -8,7 +8,7 @@ from ..database import get_db
 from ..models.student import Student
 from ..schemas.student import StudentResponse, StudentUpdate
 from ..services.face_service import FaceService
-from ..utils.dependencies import get_current_user
+from ..utils.dependencies import get_current_user, get_admin_user, get_user_department_filter
 from ..config import settings
 
 router = APIRouter(prefix="/students", tags=["students"])
@@ -19,12 +19,17 @@ def get_students(
     department: Optional[str] = None,
     semester: Optional[str] = None,
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_current_user),
+    dept_filter: Optional[str] = Depends(get_user_department_filter)
 ):
     """
     List all students, with optional filters for search query (ID/Name), department, and semester.
     """
     query = db.query(Student)
+    
+    # Restrict teacher to their department
+    if dept_filter:
+        department = dept_filter
     
     if search:
         query = query.filter(
@@ -85,7 +90,7 @@ async def create_student(
     semester: str = Form(...),
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_admin_user)
 ):
     """
     Enroll a new student. Expects multipart form fields and a face image upload.
@@ -157,7 +162,7 @@ def update_student(
     student_id_val: str,
     student_in: StudentUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_admin_user)
 ):
     """
     Update basic student details (excluding face photo re-encoding).
@@ -186,7 +191,7 @@ def update_student(
 def delete_student(
     student_id_val: str,
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_admin_user)
 ):
     """
     Deletes a student record and removes their associated face image from disk.

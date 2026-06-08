@@ -8,6 +8,8 @@ from ..config import settings
 from ..models.user import User
 from ..schemas.user import TokenData
 
+from typing import Optional
+
 # OAuth2 scheme configures Swagger doc authorization button
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login")
 
@@ -38,3 +40,9 @@ def get_admin_user(current_user: User = Depends(get_current_user)) -> User:
             detail="The user does not have enough privileges"
         )
     return current_user
+
+def get_user_department_filter(current_user: User = Depends(get_current_user)) -> Optional[str]:
+    if current_user.role == "teacher":
+        return current_user.department
+    return None
+

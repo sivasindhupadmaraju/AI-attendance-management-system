@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Search, Trash2, Filter, UserCheck, UserX, Image as ImageIcon } from 'lucide-react';
 import { studentApi } from '../api/studentApi';
 import StudentForm from '../components/StudentForm';
+import { useAuth } from '../context/AuthContext';
+
 
 const StudentsPage = () => {
+  const { user } = useAuth();
   const [students, setStudents] = useState([]);
   const [search, setSearch] = useState('');
   const [department, setDepartment] = useState('');
@@ -12,6 +15,7 @@ const StudentsPage = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
 
   const fetchStudents = async () => {
     setIsLoading(true);
@@ -74,17 +78,20 @@ const StudentsPage = () => {
           <h1 className="text-2xl font-bold font-outfit text-white">Student Directory</h1>
           <p className="text-xs text-slate-500 mt-0.5">Manage student database profiles and facial biometric images.</p>
         </div>
-        <button
-          onClick={() => {
-            setErrorMessage('');
-            setIsFormOpen(true);
-          }}
-          className="flex items-center justify-center px-5 py-2.5 bg-brand-600 border border-brand-500 hover:bg-brand-700 hover:shadow-lg hover:shadow-brand-600/20 text-white rounded-xl text-sm font-bold transition-all duration-200"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Enroll Student
-        </button>
+        {user?.role === 'admin' && (
+          <button
+            onClick={() => {
+              setErrorMessage('');
+              setIsFormOpen(true);
+            }}
+            className="flex items-center justify-center px-5 py-2.5 bg-brand-600 border border-brand-500 hover:bg-brand-700 hover:shadow-lg hover:shadow-brand-600/20 text-white rounded-xl text-sm font-bold transition-all duration-200"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Enroll Student
+          </button>
+        )}
       </div>
+
 
       {/* Filter Controls bar */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 p-4 bg-slate-900/35 border border-slate-800 rounded-2xl">
@@ -157,8 +164,9 @@ const StudentsPage = () => {
                 <th className="px-6 py-4">Department</th>
                 <th className="px-6 py-4">Semester</th>
                 <th className="px-6 py-4">Biometric Status</th>
-                <th className="px-6 py-4 text-right">Actions</th>
+                {user?.role === 'admin' && <th className="px-6 py-4 text-right">Actions</th>}
               </tr>
+
             </thead>
             <tbody className="divide-y divide-slate-800/60">
               {(() => {
@@ -171,11 +179,12 @@ const StudentsPage = () => {
                     <React.Fragment key={student.id}>
                       {showSemesterHeader && (
                         <tr className="bg-slate-900/60 border-y border-slate-850">
-                          <td colSpan="7" className="px-6 py-3 text-xs font-extrabold text-brand-400 tracking-wider uppercase font-outfit bg-slate-950/40">
+                          <td colSpan={user?.role === 'admin' ? 7 : 6} className="px-6 py-3 text-xs font-extrabold text-brand-400 tracking-wider uppercase font-outfit bg-slate-950/40">
                             {student.semester} Semester
                           </td>
                         </tr>
                       )}
+
                       <tr className="hover:bg-slate-800/25 transition-colors duration-150 text-slate-200">
                         <td className="px-6 py-4">
                           {student.image_path ? (
@@ -217,16 +226,19 @@ const StudentsPage = () => {
                             </span>
                           )}
                         </td>
-                        <td className="px-6 py-4 text-right">
-                          <button
-                            onClick={() => handleDeleteStudent(student.student_id)}
-                            className="p-2 text-rose-400 hover:text-white hover:bg-rose-500/10 rounded-lg border border-transparent hover:border-rose-500/20 transition-all"
-                            title="Delete profile"
-                          >
-                            <Trash2 className="h-4.5 w-4.5" />
-                          </button>
-                        </td>
+                        {user?.role === 'admin' && (
+                          <td className="px-6 py-4 text-right">
+                            <button
+                              onClick={() => handleDeleteStudent(student.student_id)}
+                              className="p-2 text-rose-400 hover:text-white hover:bg-rose-500/10 rounded-lg border border-transparent hover:border-rose-500/20 transition-all"
+                              title="Delete profile"
+                            >
+                              <Trash2 className="h-4.5 w-4.5" />
+                            </button>
+                          </td>
+                        )}
                       </tr>
+
                     </React.Fragment>
                   );
                 });

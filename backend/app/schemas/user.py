@@ -6,6 +6,7 @@ class UserBase(BaseModel):
     email: EmailStr
     full_name: str
     role: Optional[str] = "admin"  # "admin" or "teacher"
+    department: Optional[str] = None
 
 class UserCreate(UserBase):
     password: str
@@ -27,3 +28,12 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     email: Optional[str] = None
+
+class PasswordChangeRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+class ProfileUpdateRequest(BaseModel):
+    full_name: Optional[str] = None
+    email: Optional[EmailStr] = None
+

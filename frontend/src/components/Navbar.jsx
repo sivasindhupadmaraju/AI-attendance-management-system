@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, X, Camera, LayoutDashboard, Users, FileSpreadsheet, BarChart3, LogOut, CheckCircle2 } from 'lucide-react';
+import { Menu, X, Camera, LayoutDashboard, Users, FileSpreadsheet, BarChart3, LogOut, CheckCircle2, Settings } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -13,6 +13,7 @@ const Navbar = () => {
     { name: 'Student Directory', to: '/students', icon: Users },
     { name: 'Attendance Records', to: '/records', icon: FileSpreadsheet },
     { name: 'Reports & Analytics', to: '/reports', icon: BarChart3 },
+    { name: 'Account Settings', to: '/account', icon: Settings },
   ];
 
   return (
@@ -48,9 +49,16 @@ const Navbar = () => {
           <div className="flex items-center space-x-3">
             <div className="text-right hidden sm:block">
               <p className="text-sm font-semibold text-slate-200">{user?.full_name}</p>
-              <span className="text-[10px] bg-brand-500/10 text-brand-400 border border-brand-500/20 font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
-                {user?.role}
-              </span>
+              <div className="flex items-center justify-end space-x-1.5 mt-0.5">
+                <span className="text-[9px] bg-brand-500/10 text-brand-400 border border-brand-500/20 font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider">
+                  {user?.role}
+                </span>
+                {user?.role === 'teacher' && (
+                  <span className="text-[9px] bg-amber-500/10 text-amber-400 border border-amber-500/20 font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider max-w-[120px] truncate">
+                    {user?.department}
+                  </span>
+                )}
+              </div>
             </div>
             
             <div className="h-8 w-8 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-slate-300 text-xs">
@@ -59,6 +67,7 @@ const Navbar = () => {
           </div>
         </div>
       </header>
+
 
       {/* Mobile Sidebar Slideout Drawer Overlay */}
       {mobileMenuOpen && (

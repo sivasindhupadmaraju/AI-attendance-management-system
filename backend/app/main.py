@@ -16,12 +16,19 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Set CORS origins
-origins = [
+# Set CORS origins – read from env var (comma-separated) or use defaults
+_default_origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://ai-attendance-management-system-lac.vercel.app",
+    "http://localhost:3000",
 ]
+_env_origins = os.getenv("ALLOWED_ORIGINS", "")
+if _env_origins and _env_origins != "*":
+    origins = [o.strip() for o in _env_origins.split(",") if o.strip()] + _default_origins
+elif _env_origins == "*":
+    origins = ["*"]
+else:
+    origins = _default_origins
 
 app.add_middleware(
     CORSMiddleware,

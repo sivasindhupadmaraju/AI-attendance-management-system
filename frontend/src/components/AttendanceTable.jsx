@@ -70,6 +70,7 @@ const AttendanceTable = ({ records, isLoading }) => {
             <th className="px-6 py-4">Department</th>
             <th className="px-6 py-4">Semester</th>
             <th className="px-6 py-4">Date</th>
+            <th className="px-6 py-4">Class Hour</th>
             <th className="px-6 py-4">Arrival Time</th>
             <th className="px-6 py-4">Status</th>
             <th className="px-6 py-4">Confidence</th>
@@ -92,6 +93,7 @@ const AttendanceTable = ({ records, isLoading }) => {
                     <span>{record.date}</span>
                   </div>
                 </td>
+                <td className="px-6 py-4 font-medium text-slate-300 font-outfit">{record.period || 'Period 1'}</td>
                 <td className="px-6 py-4">
                   <div className="flex items-center space-x-1.5 text-slate-300">
                     <Clock className="h-4 w-4 text-slate-500" />
@@ -104,6 +106,7 @@ const AttendanceTable = ({ records, isLoading }) => {
             );
           })}
         </tbody>
+
       </table>
     </div>
   );

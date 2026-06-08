@@ -6,6 +6,7 @@ from .student import StudentResponse
 class AttendanceBase(BaseModel):
     student_id: int
     status: str  # "present", "late", "absent"
+    period: str = "Period 1"
     confidence: Optional[float] = None
 
 class AttendanceCreate(AttendanceBase):
@@ -24,6 +25,7 @@ class AttendanceResponse(AttendanceBase):
 
 class FaceRecognizeRequest(BaseModel):
     image: str  # Base64 encoded JPEG image from webcam
+    period: Optional[str] = None  # Specific period to mark, or None for Auto-detect
 
 class FaceRecognizeResponse(BaseModel):
     success: bool
@@ -32,3 +34,5 @@ class FaceRecognizeResponse(BaseModel):
     name: Optional[str] = None
     confidence: Optional[float] = None
     status: Optional[str] = None  # "present", "late", or None if failure
+    period: Optional[str] = None
+

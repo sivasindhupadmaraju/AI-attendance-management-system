@@ -7,7 +7,9 @@ import {
   FileSpreadsheet, 
   BarChart3, 
   ShieldAlert, 
-  LogOut 
+  LogOut,
+  Settings,
+  Clock
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -20,6 +22,8 @@ const Sidebar = () => {
     { name: 'Student Directory', to: '/students', icon: Users },
     { name: 'Attendance Records', to: '/records', icon: FileSpreadsheet },
     { name: 'Reports & Analytics', to: '/reports', icon: BarChart3 },
+    { name: 'Period Analytics', to: '/periods', icon: Clock },
+    { name: 'Account Settings', to: '/account', icon: Settings },
   ];
 
   return (
@@ -68,6 +72,11 @@ const Sidebar = () => {
           <div className="flex-1 min-w-0">
             <p className="text-xs font-semibold text-white truncate">{user?.full_name}</p>
             <p className="text-[10px] text-slate-500 truncate lowercase">{user?.email}</p>
+            {user?.role === 'teacher' && (
+              <span className="inline-block px-1.5 py-0.5 mt-0.5 rounded text-[8px] font-bold bg-amber-500/10 border border-amber-500/20 text-amber-400 uppercase tracking-wide truncate max-w-[140px]">
+                {user?.department}
+              </span>
+            )}
           </div>
         </div>
         

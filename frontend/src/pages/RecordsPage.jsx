@@ -15,6 +15,7 @@ const RecordsPage = () => {
   const [studentId, setStudentId] = useState('');
   const [status, setStatus] = useState('');
   const [department, setDepartment] = useState('');
+  const [period, setPeriod] = useState('');
 
   const handleExportCSV = async () => {
     setIsExporting(true);
@@ -24,7 +25,8 @@ const RecordsPage = () => {
         endDate,
         studentId,
         status,
-        department
+        department,
+        period
       });
     } catch (error) {
       console.error("Failed to export attendance records:", error);
@@ -42,7 +44,8 @@ const RecordsPage = () => {
         endDate,
         studentId,
         status,
-        department
+        department,
+        period
       });
       setRecords(data);
     } catch (error) {
@@ -59,7 +62,7 @@ const RecordsPage = () => {
     }, 455);
 
     return () => clearTimeout(delayDebounceId);
-  }, [startDate, endDate, studentId, status, department]);
+  }, [startDate, endDate, studentId, status, department, period]);
 
   const handleResetFilters = () => {
     setStartDate('');
@@ -67,6 +70,7 @@ const RecordsPage = () => {
     setStudentId('');
     setStatus('');
     setDepartment('');
+    setPeriod('');
   };
 
   return (
@@ -103,7 +107,7 @@ const RecordsPage = () => {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-6 gap-4">
           {/* Start Date */}
           <div>
             <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Start Date</label>
@@ -161,6 +165,25 @@ const RecordsPage = () => {
               <option value="Mechanical Engineering">Mechanical Engineering</option>
               <option value="Civil Engineering">Civil Engineering</option>
               <option value="Information Technology">Information Technology</option>
+            </select>
+          </div>
+
+          {/* Class Hour filter */}
+          <div>
+            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Class Hour / Period</label>
+            <select
+              value={period}
+              onChange={(e) => setPeriod(e.target.value)}
+              className="w-full px-3 py-2 bg-slate-950/60 border border-slate-850 focus:border-brand-500 rounded-xl text-xs outline-none text-slate-400 transition-all appearance-none"
+            >
+              <option value="">All Hours</option>
+              <option value="Period 1 (9-10 AM)">Period 1 (9-10 AM)</option>
+              <option value="Period 2 (10-11 AM)">Period 2 (10-11 AM)</option>
+              <option value="Period 3 (11 AM-12 PM)">Period 3 (11 AM-12 PM)</option>
+              <option value="Period 4 (12-1 PM)">Period 4 (12-1 PM)</option>
+              <option value="Period 5 (2-3 PM)">Period 5 (2-3 PM)</option>
+              <option value="Period 6 (3-4 PM)">Period 6 (3-4 PM)</option>
+              <option value="Period 7 (4-5 PM)">Period 7 (4-5 PM)</option>
             </select>
           </div>
 

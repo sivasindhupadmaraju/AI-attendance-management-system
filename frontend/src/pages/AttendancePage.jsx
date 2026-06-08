@@ -4,10 +4,12 @@ import WebcamCapture from '../components/WebcamCapture';
 import { attendanceApi } from '../api/attendanceApi';
 
 const AttendancePage = () => {
+  const [selectedPeriod, setSelectedPeriod] = useState('Auto-Detect');
   const [isProcessing, setIsProcessing] = useState(false);
   const [scanResult, setScanResult] = useState(null);
   const [logs, setLogs] = useState([]);
   const [sessionCount, setSessionCount] = useState(0);
+
 
   // Fetch today's logs on mount to populate the side list
   const fetchTodayLogs = async () => {
@@ -34,7 +36,7 @@ const AttendancePage = () => {
     setScanResult(null);
 
     try {
-      const result = await attendanceApi.recognizeFace(base64Image);
+      const result = await attendanceApi.recognizeFace(base64Image, selectedPeriod);
       setScanResult(result);
       
       if (result.success) {
@@ -42,6 +44,7 @@ const AttendancePage = () => {
         fetchTodayLogs();
       }
     } catch (error) {
+
       console.error("Recognition API error:", error);
       setScanResult({
         success: false,
@@ -63,10 +66,35 @@ const AttendancePage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Left 2 Cols: Webcam Feed & Scan Feedback */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-slate-900/30 border border-slate-800 rounded-2xl p-6 flex flex-col items-center">
-            <h2 className="text-sm font-bold font-outfit text-slate-300 self-start mb-4">Biometric Camera Stream</h2>
-            <WebcamCapture onCapture={handleCaptureFrame} isProcessing={isProcessing} />
+          <div className="bg-slate-900/30 border border-slate-800 rounded-2xl p-6 flex flex-col w-full">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+              <h2 className="text-sm font-bold font-outfit text-slate-300">Biometric Camera Stream</h2>
+              
+              <div className="flex items-center space-x-2">
+                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Class Hour / Period:</span>
+                <select
+                  value={selectedPeriod}
+                  onChange={(e) => setSelectedPeriod(e.target.value)}
+                  className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-300 outline-none focus:border-brand-500 transition-colors cursor-pointer appearance-none pr-8 relative"
+                  style={{ backgroundImage: `url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E")`, backgroundPosition: 'right 0.5rem center', backgroundSize: '1.25em 1.25em', backgroundRepeat: 'no-repeat' }}
+                >
+                  <option value="Auto-Detect">Auto-Detect (Time-based)</option>
+                  <option value="Period 1 (9-10 AM)">Period 1 (9-10 AM)</option>
+                  <option value="Period 2 (10-11 AM)">Period 2 (10-11 AM)</option>
+                  <option value="Period 3 (11 AM-12 PM)">Period 3 (11 AM-12 PM)</option>
+                  <option value="Period 4 (12-1 PM)">Period 4 (12-1 PM)</option>
+                  <option value="Period 5 (2-3 PM)">Period 5 (2-3 PM)</option>
+                  <option value="Period 6 (3-4 PM)">Period 6 (3-4 PM)</option>
+                  <option value="Period 7 (4-5 PM)">Period 7 (4-5 PM)</option>
+                </select>
+              </div>
+            </div>
+            
+            <div className="flex flex-col items-center">
+              <WebcamCapture onCapture={handleCaptureFrame} isProcessing={isProcessing} />
+            </div>
           </div>
+
 
           {/* Diagnostic & Scan Result Feedback Card */}
           {scanResult && (
@@ -97,12 +125,14 @@ const AttendancePage = () => {
                   {scanResult.success && (
                     <div className="flex flex-wrap gap-x-4 gap-y-1.5 pt-2 text-[11px] text-slate-400 font-medium">
                       <span>Roll: <strong className="text-brand-400 font-mono">{scanResult.student_id}</strong></span>
+                      <span>Period: <strong className="text-amber-400">{scanResult.period}</strong></span>
                       <span>Confidence: <strong className="text-white">{Math.round(scanResult.confidence * 100)}%</strong></span>
                       <span>Status: <strong className={`uppercase ${
                         scanResult.status === 'late' ? 'text-amber-400' : 'text-emerald-400'
                       }`}>{scanResult.status}</strong></span>
                     </div>
                   )}
+
                 </div>
               </div>
             </div>
@@ -155,11 +185,13 @@ const AttendancePage = () => {
                       }`}>
                         {log.status}
                       </span>
-                      <p className="text-[10px] text-slate-500 font-semibold">
+                      <p className="text-[10px] text-slate-400 font-semibold font-outfit">{log.period}</p>
+                      <p className="text-[9px] text-slate-500 font-medium mt-0.5">
                         {log.time_in ? log.time_in.substring(0, 5) : ''}
                       </p>
                     </div>
                   </div>
+
                 );
               })
             )}

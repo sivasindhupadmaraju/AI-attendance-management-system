@@ -11,6 +11,14 @@ export const reportApi = {
     return response.data;
   },
 
+  getPeriodSummary: async (targetDate = null, department = null) => {
+    const params = {};
+    if (targetDate) params.target_date = targetDate;
+    if (department) params.department = department;
+    const response = await api.get('/reports/period-summary', { params });
+    return response.data;
+  },
+
   exportCSV: async (filters = {}) => {
     const params = {};
     if (filters.startDate) params.start_date = filters.startDate;
@@ -18,6 +26,8 @@ export const reportApi = {
     if (filters.department) params.department = filters.department;
     if (filters.status) params.status = filters.status;
     if (filters.studentId) params.student_id = filters.studentId;
+    if (filters.period) params.period = filters.period;
+
 
     try {
       // Request as blob to handle file download in frontend with authorization headers
