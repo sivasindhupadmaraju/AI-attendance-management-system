@@ -16,6 +16,9 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)):
     """
     Register a new system user (admin/teacher).
     """
+    """
+    Register a new system user (admin/teacher).
+    """
     # Check if user already exists
     db_user = db.query(User).filter(User.email == user_in.email).first()
     if db_user:
