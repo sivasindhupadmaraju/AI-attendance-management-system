@@ -30,6 +30,8 @@ elif _env_origins == "*":
 else:
     origins = _default_origins
 
+print("ENV ALLOWED_ORIGINS =", _env_origins)
+print("FINAL CORS ORIGINS =", origins)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
