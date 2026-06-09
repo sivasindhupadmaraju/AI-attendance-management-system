@@ -14,6 +14,9 @@ const WebcamCapture = ({ onCapture, isProcessing }) => {
   useEffect(() => {
     const getDevices = async () => {
       try {
+        if (!navigator.mediaDevices) {
+          throw new Error("MediaDevices API not available. Please ensure you are on a secure context (HTTPS) or localhost.");
+        }
         // Request permissions first to get device labels
         const initialStream = await navigator.mediaDevices.getUserMedia({ video: true });
         initialStream.getTracks().forEach(track => track.stop());
@@ -27,7 +30,7 @@ const WebcamCapture = ({ onCapture, isProcessing }) => {
         }
       } catch (err) {
         console.error("Error enumerating devices:", err);
-        setError("Camera permission denied or camera not found. Please enable permission.");
+        setError(err.message || "Camera permission denied or camera not found. Please enable permission.");
       }
     };
     
@@ -62,9 +65,7 @@ const WebcamCapture = ({ onCapture, isProcessing }) => {
       
       const newStream = await navigator.mediaDevices.getUserMedia(constraints);
       setStream(newStream);
-      if (videoRef.current) {
-        videoRef.current.srcObject = newStream;
-      }
+      // Let the useEffect handle assigning srcObject
     } catch (err) {
       console.error("Error starting camera:", err);
       setError("Unable to access chosen camera. It may be in use by another application.");
@@ -82,6 +83,13 @@ const WebcamCapture = ({ onCapture, isProcessing }) => {
   const toggleCamera = () => {
     setCameraActive(!cameraActive);
   };
+
+  // Attach stream to video element when it becomes available
+  useEffect(() => {
+    if (videoRef.current && stream) {
+      videoRef.current.srcObject = stream;
+    }
+  }, [stream, cameraActive]);
 
   const switchCamera = () => {
     if (devices.length < 2) return;

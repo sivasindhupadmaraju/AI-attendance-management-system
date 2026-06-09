@@ -78,7 +78,6 @@ const StudentsPage = () => {
           <h1 className="text-2xl font-bold font-outfit text-white">Student Directory</h1>
           <p className="text-xs text-slate-500 mt-0.5">Manage student database profiles and facial biometric images.</p>
         </div>
-        {user?.role === 'admin' && (
           <button
             onClick={() => {
               setErrorMessage('');
@@ -89,7 +88,6 @@ const StudentsPage = () => {
             <Plus className="mr-2 h-4 w-4" />
             Enroll Student
           </button>
-        )}
       </div>
 
 
@@ -164,7 +162,7 @@ const StudentsPage = () => {
                 <th className="px-6 py-4">Department</th>
                 <th className="px-6 py-4">Semester</th>
                 <th className="px-6 py-4">Biometric Status</th>
-                {user?.role === 'admin' && <th className="px-6 py-4 text-right">Actions</th>}
+                <th className="px-6 py-4 text-right">Actions</th>
               </tr>
 
             </thead>
@@ -179,7 +177,7 @@ const StudentsPage = () => {
                     <React.Fragment key={student.id}>
                       {showSemesterHeader && (
                         <tr className="bg-slate-900/60 border-y border-slate-850">
-                          <td colSpan={user?.role === 'admin' ? 7 : 6} className="px-6 py-3 text-xs font-extrabold text-brand-400 tracking-wider uppercase font-outfit bg-slate-950/40">
+                          <td colSpan={7} className="px-6 py-3 text-xs font-extrabold text-brand-400 tracking-wider uppercase font-outfit bg-slate-950/40">
                             {student.semester} Semester
                           </td>
                         </tr>
@@ -226,7 +224,6 @@ const StudentsPage = () => {
                             </span>
                           )}
                         </td>
-                        {user?.role === 'admin' && (
                           <td className="px-6 py-4 text-right">
                             <button
                               onClick={() => handleDeleteStudent(student.student_id)}
@@ -236,7 +233,6 @@ const StudentsPage = () => {
                               <Trash2 className="h-4.5 w-4.5" />
                             </button>
                           </td>
-                        )}
                       </tr>
 
                     </React.Fragment>

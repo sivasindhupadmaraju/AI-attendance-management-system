@@ -1,10 +1,12 @@
 import React, { useState, useRef } from 'react';
 import { Upload, X, User, BookOpen, Layers, Fingerprint } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const StudentForm = ({ onSubmit, onClose, isSubmitting }) => {
+  const { user } = useAuth();
   const [studentId, setStudentId] = useState('');
   const [name, setName] = useState('');
-  const [department, setDepartment] = useState('');
+  const [department, setDepartment] = useState(user?.role === 'teacher' ? user.department : '');
   const [semester, setSemester] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
@@ -134,7 +136,8 @@ const StudentForm = ({ onSubmit, onClose, isSubmitting }) => {
                   required
                   value={department}
                   onChange={(e) => setDepartment(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 bg-slate-950/60 border border-slate-800 focus:border-brand-500 rounded-xl text-sm outline-none transition-all duration-200 appearance-none text-slate-300"
+                  disabled={user?.role === 'teacher'}
+                  className="w-full pl-11 pr-4 py-3 bg-slate-950/60 border border-slate-800 focus:border-brand-500 rounded-xl text-sm outline-none transition-all duration-200 appearance-none text-slate-300 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <option value="" disabled>Select Department</option>
                   <option value="Computer Science">Computer Science</option>

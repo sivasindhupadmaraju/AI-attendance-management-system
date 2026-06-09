@@ -90,7 +90,7 @@ async def create_student(
     semester: str = Form(...),
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
-    current_user=Depends(get_admin_user)
+    current_user=Depends(get_current_user)
 ):
     """
     Enroll a new student. Expects multipart form fields and a face image upload.
@@ -103,6 +103,9 @@ async def create_student(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Student with ID '{student_id}' is already enrolled."
         )
+
+    if current_user.role == "teacher":
+        department = current_user.department
 
     # Prepare file paths
     # Clean filename
@@ -162,7 +165,7 @@ def update_student(
     student_id_val: str,
     student_in: StudentUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(get_admin_user)
+    current_user=Depends(get_current_user)
 ):
     """
     Update basic student details (excluding face photo re-encoding).
@@ -178,6 +181,12 @@ def update_student(
             detail="Student not found"
         )
         
+    if current_user.role == "teacher" and student.department != current_user.department:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to update students in other departments")
+        
+    if current_user.role == "teacher" and student_in.department is not None:
+        student_in.department = current_user.department
+        
     # Update fields
     update_data = student_in.model_dump(exclude_unset=True)
     for field, value in update_data.items():
@@ -191,7 +200,7 @@ def update_student(
 def delete_student(
     student_id_val: str,
     db: Session = Depends(get_db),
-    current_user=Depends(get_admin_user)
+    current_user=Depends(get_current_user)
 ):
     """
     Deletes a student record and removes their associated face image from disk.
@@ -206,6 +215,9 @@ def delete_student(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Student not found"
         )
+        
+    if current_user.role == "teacher" and student.department != current_user.department:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to delete students in other departments")
         
     # Attempt to delete file from storage if path is stored
     if student.image_path:

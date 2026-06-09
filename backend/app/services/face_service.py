@@ -8,12 +8,17 @@ import io
 # Setup logger
 logger = logging.getLogger("face_service")
 
-# Try to import face_recognition and cv2
+# Import OpenCV which is required for image decoding and fallback
+try:
+    import cv2
+except ImportError:
+    logger.error("OpenCV is not installed. Please install opencv-python.")
+
+# Try to import face_recognition
 try:
     import face_recognition
-    import cv2
     HAS_FACE_RECOGNITION = True
-    logger.info("face_recognition and OpenCV loaded successfully.")
+    logger.info("face_recognition loaded successfully.")
 except Exception as e:
     HAS_FACE_RECOGNITION = False
     logger.warning(f"face_recognition import failed ({e}), will use DeepFace fallback.")

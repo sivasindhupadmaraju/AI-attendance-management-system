@@ -14,3 +14,4 @@ openpyxl
 email-validator
 Pillow
 Click>=6.0
+
